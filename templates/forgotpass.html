@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Forgot Password | MyApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-xl-5 col-lg-6 col-md-8">
+    <div class="page-card p-5">
+      <div class="section-title text-center mb-4">
+        <h1>Forgot Password</h1>
+        <p class="text-muted mb-0">Enter your email address and we will send you a link to reset your password.</p>
+      </div>
+      <form id="forgotPasswordForm" action="/myapp/forgot_password_post/" method="post">
+        {% csrf_token %}
+        <div class="mb-4">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+          <small class="text-danger d-none" id="emailError">Please enter a valid email address</small>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Send Reset Link</button>
+      </form>
+      <div class="text-center mt-4">
+        <a href="/myapp/login/" class="link-soft">Back to login</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function validateForgotPasswordForm(event) {
+    event.preventDefault();
+    let isValid = true;
+
+    // Validate email
+    const email = document.getElementById('email').value.trim();
+    const emailError = document.getElementById('emailError');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        emailError.classList.remove('d-none');
+        isValid = false;
+    } else {
+        emailError.classList.add('d-none');
+    }
+
+    if (isValid) {
+        document.getElementById('forgotPasswordForm').submit();
+    }
+}
+
+document.getElementById('forgotPasswordForm').addEventListener('submit', validateForgotPasswordForm);
+</script>
+{% endblock %}

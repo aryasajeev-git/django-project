@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Document | MyApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-6 col-lg-7 col-md-9">
+        <div class="page-card p-5">
+            <div class="section-title text-center mb-4">
+                <h1>Edit your document</h1>
+                <p>Update your document details and upload the revised file.</p>
+            </div>
+            <form action="/myapp/editdocument_post/" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ document.id }}">
+                <div class="mb-4">
+                    <label for="documentName" class="form-label">Document Name</label>
+                    <input type="text" class="form-control" id="documentName" name="document_name" value="{{ document.FileName }}" placeholder="E.g. Passport copy" required>
+                </div>
+                <div class="mb-4">
+                    <label for="documentType" class="form-label">Document Type</label>
+                    <input type="text" class="form-control" id="documentType" name="document_type" value="{{ document.Type }}" placeholder="E.g. ID, Invoice, Contract" required>
+                </div>
+                <div class="mb-4">
+                    <label for="documentFile" class="form-label">Choose file</label>
+                    <input type="file" class="form-control" id="documentFile" name="file">
+                    <div class="form-text">Leave blank to keep the current file.</div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Save changes</button>
+            </form>
+            <div class="text-center mt-4">
+                <a href="/myapp/viewprofile/" class="link-soft">Back to profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

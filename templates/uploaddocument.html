@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Document | MyApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-6 col-lg-7 col-md-9">
+        <div class="page-card p-5">
+            <div class="section-title text-center mb-4">
+                <h1>Upload your document</h1>
+                <p>Give your document a title, choose its type, then upload the file.</p>
+            </div>
+            <form id="uploadDocForm" action="/myapp/uploaddocument_post/" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="documentName" class="form-label">Document Name</label>
+                    <input type="text" class="form-control" id="documentName" name="document_name" placeholder="E.g. Passport copy" required>
+                    <small class="text-danger d-none" id="nameError">Document name is required (min 3 characters)</small>
+                </div>
+                <div class="mb-4">
+                    <label for="documentType" class="form-label">Document Type</label>
+                    <input type="text" class="form-control" id="documentType" name="document_type" placeholder="E.g. ID, Invoice, Contract" required>
+                    <small class="text-danger d-none" id="typeError">Document type is required (min 3 characters)</small>
+                </div>
+                <div class="mb-4">
+                    <label for="documentFile" class="form-label">Choose file</label>
+                    <input type="file" class="form-control" id="documentFile" name="file" required>
+                    <small class="text-danger d-none" id="fileError">File must be PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, or Image (max 5MB)</small>
+                    <small class="text-muted d-block mt-2">Supported formats: PDF, Word, Excel, PowerPoint, Text, Images (Max 5MB)</small>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Upload document</button>
+            </form>
+            <div class="text-center mt-4">
+                <a href="/myapp/viewprofile/" class="link-soft">Back to profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const ALLOWED_TYPES = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain',
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp'
+];
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+function validateUploadDocForm(event) {
+    event.preventDefault();
+    let isValid = true;
+
+    // Validate document name
+    const docName = document.getElementById('documentName').value.trim();
+    const nameError = document.getElementById('nameError');
+    if (docName.length < 3) {
+        nameError.classList.remove('d-none');
+        isValid = false;
+    } else {
+        nameError.classList.add('d-none');
+    }
+
+    // Validate document type
+    const docType = document.getElementById('documentType').value.trim();
+    const typeError = document.getElementById('typeError');
+    if (docType.length < 3) {
+        typeError.classList.remove('d-none');
+        isValid = false;
+    } else {
+        typeError.classList.add('d-none');
+    }
+
+    // Validate file
+    const fileInput = document.getElementById('documentFile');
+    const fileError = document.getElementById('fileError');
+    
+    if (fileInput.files.length === 0) {
+        fileError.textContent = 'Please select a file';
+        fileError.classList.remove('d-none');
+        isValid = false;
+    } else {
+        const file = fileInput.files[0];
+        
+        // Check file type
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            fileError.textContent = 'Invalid file type. Please upload a supported file format.';
+            fileError.classList.remove('d-none');
+            isValid = false;
+        } 
+        // Check file size
+        else if (file.size > MAX_FILE_SIZE) {
+            fileError.textContent = `File size exceeds 5MB. Your file is ${(file.size / (1024 * 1024)).toFixed(2)}MB`;
+            fileError.classList.remove('d-none');
+            isValid = false;
+        } else {
+            fileError.classList.add('d-none');
+        }
+    }
+
+    if (isValid) {
+        document.getElementById('uploadDocForm').submit();
+    }
+}
+
+document.getElementById('uploadDocForm').addEventListener('submit', validateUploadDocForm);
+</script>
+{% endblock %}

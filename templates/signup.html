@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign up | MyApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-7 col-lg-8 col-md-10">
+        <div class="card page-card p-5">
+            <div class="section-title text-center mb-4">
+                <h1>Create your account</h1>
+                <p>Start with a profile that looks fresh and easy to manage.</p>
+            </div>
+            <form id="signupForm" action="/myapp/signup_post/" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">Full name</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="John Doe" required>
+                        <small class="text-danger d-none" id="nameError">Name must be at least 3 characters</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                        <small class="text-danger d-none" id="emailError">Please enter a valid email address</small>
+                    </div>
+                </div>
+                <div class="row g-3 mt-3">
+                    <div class="col-md-6">
+                        <label for="phone_no" class="form-label">Phone</label>
+                        <input type="tel" class="form-control" id="phone_no" name="phone_no" placeholder="9876543210" required>
+                        <small class="text-danger d-none" id="phoneError">Phone must be 7-15 digits only</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender" required>
+                            <option selected disabled value="">Select</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                        <small class="text-danger d-none" id="genderError">Please select a gender</small>
+                    </div>
+                </div>
+                <div class="mb-3 mt-3">
+                    <label for="photo" class="form-label">Profile photo</label>
+                    <input type="file" class="form-control" id="photo" name="photo" accept="image/*" required>
+                    <small class="text-danger d-none" id="photoError">Please upload an image file (JPG, PNG, GIF, WebP)</small>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Choose a secure password" required>
+                    <small class="text-danger d-none" id="passwordError">Password must be at least 8 characters with uppercase, lowercase, and a number</small>
+                    <div id="passwordStrength" class="mt-2"></div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Create account</button>
+            </form>
+            <div class="text-center mt-4">
+                <span class="text-muted">Already joined?</span>
+                <a href="/myapp/login/" class="link-soft">Sign in</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function validateSignupForm(event) {
+    event.preventDefault();
+    let isValid = true;
+
+    // Validate name
+    const name = document.getElementById('name').value.trim();
+    const nameError = document.getElementById('nameError');
+    if (name.length < 3) {
+        nameError.classList.remove('d-none');
+        isValid = false;
+    } else {
+        nameError.classList.add('d-none');
+    }
+
+    // Validate email
+    const email = document.getElementById('email').value.trim();
+    const emailError = document.getElementById('emailError');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        emailError.classList.remove('d-none');
+        isValid = false;
+    } else {
+        emailError.classList.add('d-none');
+    }
+
+    // Validate phone
+    const phone = document.getElementById('phone_no').value.trim();
+    const phoneError = document.getElementById('phoneError');
+    const phoneRegex = /^\d{7,15}$/;
+    if (!phoneRegex.test(phone)) {
+        phoneError.classList.remove('d-none');
+        isValid = false;
+    } else {
+        phoneError.classList.add('d-none');
+    }
+
+    // Validate gender
+    const gender = document.getElementById('gender').value;
+    const genderError = document.getElementById('genderError');
+    if (!gender) {
+        genderError.classList.remove('d-none');
+        isValid = false;
+    } else {
+        genderError.classList.add('d-none');
+    }
+
+    // Validate photo
+    const photo = document.getElementById('photo').files;
+    const photoError = document.getElementById('photoError');
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (photo.length === 0 || !validImageTypes.includes(photo[0].type)) {
+        photoError.classList.remove('d-none');
+        isValid = false;
+    } else {
+        photoError.classList.add('d-none');
+    }
+
+    // Validate password
+    const password = document.getElementById('password').value;
+    const passwordError = document.getElementById('passwordError');
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(password)) {
+        passwordError.classList.remove('d-none');
+        isValid = false;
+    } else {
+        passwordError.classList.add('d-none');
+    }
+
+    if (isValid) {
+        document.getElementById('signupForm').submit();
+    }
+}
+
+// Check password strength in real-time
+document.getElementById('password').addEventListener('input', function() {
+    const password = this.value;
+    const strengthDiv = document.getElementById('passwordStrength');
+    let strength = 0;
+    let strengthText = '';
+    let strengthColor = '';
+
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+    if (strength < 3) {
+        strengthText = 'Weak';
+        strengthColor = '#dc3545';
+    } else if (strength < 5) {
+        strengthText = 'Fair';
+        strengthColor = '#ffc107';
+    } else {
+        strengthText = 'Strong';
+        strengthColor = '#28a745';
+    }
+
+    strengthDiv.innerHTML = `<small style="color: ${strengthColor};">Password Strength: ${strengthText}</small>`;
+});
+
+document.getElementById('signupForm').addEventListener('submit', validateSignupForm);
+</script>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | MyApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-6 col-lg-7 col-md-9">
+        <div class="card page-card p-5 text-center">
+            <div class="section-title mb-4">
+                <h1>Fast profile pages, built simply.</h1>
+                <p>Access your profile, edit details, and manage your account with a clean experience.</p>
+            </div>
+            <div class="d-grid gap-3">
+                <a href="/myapp/login/" class="btn btn-primary">Sign in</a>
+                <a href="/myapp/signup/" class="btn btn-accent">Create a free account</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
