@@ -51,19 +51,14 @@ def signupfunction_post(request):
     si.gender = gender
     # save uploaded photo file to MEDIA_ROOT and store filename
     if photo:
-        filename = photo.name
-        media_path = os.path.join(settings.MEDIA_ROOT, filename)
-        os.makedirs(os.path.dirname(media_path), exist_ok=True)
-        with open(media_path, 'wb+') as dest:
-            for chunk in photo.chunks():
-                dest.write(chunk)
-        si.photo = filename
-    else:
-        si.photo = ''
+        si.photo = photo
+
     si.AUTHUSER = authuser
     si.save()
-    return HttpResponse('<script>alert("Signup successful! Please log in."); window.location="/myapp/login/";</script>')
 
+    return HttpResponse(
+        '<script>alert("Signup successful! Please log in."); window.location="/myapp/login/";</script>'
+    )
 def home(request):
     return render(request, 'home.html')
 
@@ -90,75 +85,89 @@ def login_post(request):
 def viewprofile(request):
     if not request.user.is_authenticated:
         return redirect('/myapp/login/')
-    
-    profile = None
-    photo_url = None
-    
+
     try:
-        profile = Usersprofile.objects.get(AUTHUSER__id=request.user.id)
-        if profile and profile.photo:
-            media_path = os.path.join(settings.MEDIA_ROOT, profile.photo)
-            if os.path.exists(media_path):
-                photo_url = settings.MEDIA_URL + profile.photo
+        profile = Usersprofile.objects.get(AUTHUSER=request.user)
+
+        if profile.photo:
+            photo_url = profile.photo.url
+        else:
+            photo_url = None
+
     except Usersprofile.DoesNotExist:
         profile = None
-    
-    return render(request, 'viewprofile.html', {'profile': profile, 'photo_url': photo_url})
-    
+        photo_url = None
+
+    return render(request, 'viewprofile.html', {
+        'profile': profile,
+        'photo_url': photo_url
+    })
+
 
 def editprofile(request):
     if not request.user.is_authenticated:
         return redirect('/myapp/login/')
-    
+
     try:
-        profile = Usersprofile.objects.get(AUTHUSER__id=request.user.id)
-        photo_url = None
-        if profile and profile.photo:
-            media_path = os.path.join(settings.MEDIA_ROOT, profile.photo)
-            if os.path.exists(media_path):
-                photo_url = settings.MEDIA_URL + profile.photo
-        return render(request, 'editprofile.html', {'profile': profile, 'photo_url': photo_url})
+        profile = Usersprofile.objects.get(AUTHUSER=request.user)
+
+        if profile.photo:
+            photo_url = profile.photo.url
+        else:
+            photo_url = None
+
+        return render(request, 'editprofile.html', {
+            'profile': profile,
+            'photo_url': photo_url
+        })
+
     except Usersprofile.DoesNotExist:
-        return HttpResponse('<script>alert("Profile not found. Please sign up."); window.location="/myapp/signup/";</script>')
+        return HttpResponse(
+            '<script>alert("Profile not found. Please sign up."); window.location="/myapp/signup/";</script>'
+        )
+
 
 def editprofile_post(request):
     if not request.user.is_authenticated:
         return redirect('/myapp/login/')
-    
+
     if request.method != 'POST':
         return redirect('/myapp/editprofile/')
-    
+
     try:
-        profile = Usersprofile.objects.get(AUTHUSER__id=request.user.id)
+        profile = Usersprofile.objects.get(AUTHUSER=request.user)
+
     except Usersprofile.DoesNotExist:
-        return HttpResponse('<script>alert("Profile not found."); window.location="/myapp/login/";</script>')
-    
+        return HttpResponse(
+            '<script>alert("Profile not found."); window.location="/myapp/login/";</script>'
+        )
+
     name = request.POST.get('name')
     phone_no = request.POST.get('phone_no')
     gender = request.POST.get('gender')
     photo = request.FILES.get('photo')
-    # update fields if provided
+
     if name is not None:
         profile.name = name
+
     if phone_no is not None:
         phone_no = phone_no.strip()
+
         if not phone_no.isdigit() or len(phone_no) < 7 or len(phone_no) > 15:
-            return HttpResponse('<script>alert("Please enter a valid phone number with 7 to 15 digits."); window.location="/myapp/editprofile/";</script>')
+            return HttpResponse(
+                '<script>alert("Please enter a valid phone number with 7 to 15 digits."); window.location="/myapp/editprofile/";</script>'
+            )
+
         profile.phone_no = int(phone_no)
+
     if gender is not None:
         profile.gender = gender
 
-    # handle uploaded photo: save file to MEDIA_ROOT and store filename
     if photo:
-        filename = photo.name
-        media_path = os.path.join(settings.MEDIA_ROOT, filename)
-        os.makedirs(os.path.dirname(media_path), exist_ok=True)
-        with open(media_path, 'wb+') as dest:
-            for chunk in photo.chunks():
-                dest.write(chunk)
-        profile.photo = filename
+        profile.photo = photo
 
     profile.save()
+
     return redirect('/myapp/viewprofile/')
 
 def uploaddocument(request):
