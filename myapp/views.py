@@ -1,3 +1,4 @@
+import cloudinary.uploader
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -51,11 +52,11 @@ def signupfunction_post(request):
     si.gender = gender
     # save uploaded photo file to MEDIA_ROOT and store filename
     if photo:
-        si.photo = photo
-
+        upload_result = cloudinary.uploader.upload(photo)
+        si.photo = upload_result["secure_url"]
     si.AUTHUSER = authuser
     si.save()
-
+    
     return HttpResponse(
         '<script>alert("Signup successful! Please log in."); window.location="/myapp/login/";</script>'
     )
@@ -90,7 +91,7 @@ def viewprofile(request):
         profile = Usersprofile.objects.get(AUTHUSER=request.user)
 
         if profile.photo:
-            photo_url = profile.photo.url
+            photo_url = profile.photo
         else:
             photo_url = None
 
@@ -112,7 +113,7 @@ def editprofile(request):
         profile = Usersprofile.objects.get(AUTHUSER=request.user)
 
         if profile.photo:
-            photo_url = profile.photo.url
+            photo_url = profile.photo
         else:
             photo_url = None
 
@@ -164,7 +165,8 @@ def editprofile_post(request):
         profile.gender = gender
 
     if photo:
-        profile.photo = photo
+        upload_result = cloudinary.uploader.upload(photo)
+        profile.photo = upload_result["secure_url"]
 
     profile.save()
 
